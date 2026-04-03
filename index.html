@@ -269,7 +269,8 @@ async function handleSubmit() {
   btn.disabled = true;
 
   try {
-    var response = await fetch('https://formspree.io/f/xojpkvyq', {
+    // 1. Formspree - Blake에게 알림
+    var formspreeRes = await fetch('https://formspree.io/f/xojpkvyq', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({
@@ -281,7 +282,26 @@ async function handleSubmit() {
         고민: concern
       })
     });
-    if (response.ok) {
+
+    // 2. Loops - 신청자에게 자동 이메일 발송
+    if (email) {
+      await fetch('https://app.loops.so/api/v1/transactional', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eac62caf5c969a175f0bfccd5beb6eb7'
+        },
+        body: JSON.stringify({
+          transactionalId: 'cmnjgv9un08su0ivy0eza64y2',
+          email: email,
+          dataVariables: {
+            name: name
+          }
+        })
+      });
+    }
+
+    if (formspreeRes.ok) {
       document.getElementById('form-view').style.display = 'none';
       document.getElementById('success-view').style.display = 'block';
     } else {
